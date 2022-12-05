@@ -33,10 +33,13 @@ export default class SoundCloudControllerExt extends SoundCloudController {
 
     emitPlayerStateChange() {
         super.emitPlayerStateChange()
-        browser.runtime.sendMessage({
+        chrome.runtime.sendMessage({
             type: 'playerStateUpdate',
             data: this.playerState
         })
-        console.log('sendMessage playerStateUpdate')
+            .catch(error => {
+                if (error == 'Error: Could not establish connection. Receiving end does not exist.') return
+                console.error(error)
+            })
     }
 }

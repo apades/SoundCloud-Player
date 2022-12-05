@@ -16,7 +16,6 @@ export default class SoundCloudController {
     playerState = {} as PlayerState
 
     constructor() {
-        console.log('create SoundCloudController')
         this.initEl()
         this.initAudioElEvents()
     }
@@ -42,7 +41,8 @@ export default class SoundCloudController {
         play: () => this.setPlayerState({ isPlaying: true }),
         pause: () => this.setPlayerState({ isPlaying: false }),
         timeupdate: () => this.setPlayerState({ currentTime: this.tarAudioEl.currentTime }),
-        durationchange: () => this.setPlayerState({ currentTime: this.tarAudioEl.duration }),
+        durationchange: () => this.setPlayerState({ duration: this.tarAudioEl.duration })
+        ,
         // ? isloading state
         // waiting: () => 1,
         // canplay: () => 1,
@@ -73,11 +73,12 @@ export default class SoundCloudController {
         this.audioElObserver.observe(this.tarAudioEl, { attributes: true })
     }
 
+    // TODO action in origin soundCloud page
+
     setPlayerState(newState: Partial<PlayerState>) {
         let isUpdate = tentries(newState).find(([key, val]) =>
             this.playerState[key] !== val
         )
-        console.log('setPlayerState', isUpdate)
 
         if (isUpdate) {
             tassign(this.playerState, newState)
