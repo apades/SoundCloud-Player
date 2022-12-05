@@ -1,0 +1,25 @@
+{
+  "name": "SoundCloud-Player",
+  "version": "1.0.0",
+  "main": "index.js",
+  "description": " ",
+  "repository": "git@github.com:S4WA/SoundCloud-Player.git",
+  "contributors": [
+    "apades <apad2@qq.com>",
+    "S4WA"
+  ],
+  "scripts": {
+    "dev": "webpack --watch --config ./build/webpack.dev.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.203",
+    "@types/jquery": "^3.5.14",
+    "terser-webpack-plugin": "^5.0.3",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.3",
+    "webpack": "^5.35.0",
+    "webpack-cli": "^4.6.0",
+    "webpackbar": "^5.0.0-3"
+  }
+}

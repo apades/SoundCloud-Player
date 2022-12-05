@@ -9,19 +9,32 @@
     "tabs",
     "clipboardWrite"
   ],
-  "content_scripts": [ {
-    "all_frames": true,
-    "js": [
-      "browser-polyfill.min.js",
-      "jquery-3.4.1.min.js",
-      "contents/contents.js",
-      "contents/utils.js"
-    ],
-    "matches": [
-      "*://soundcloud.com/*"
-    ],
-    "run_at": "document_end"
-  } ],
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "js": [
+        "lib/SoundCloudControllerExt.js",
+        "browser-polyfill.min.js",
+        "jquery-3.4.1.min.js",
+        "contents/contents.js",
+        "contents/utils.js"
+      ],
+      "matches": [
+        "*://soundcloud.com/*"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "all_frames": true,
+      "js": [
+        "injector.js"
+      ],
+      "matches": [
+        "*://soundcloud.com/*"
+      ],
+      "run_at": "document_start"
+    }
+  ],
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": "icon.png"
@@ -38,5 +51,15 @@
       },
       "description": "Open the popup"
     }
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "inject_audio.js"
+      ],
+      "matches": [
+        "*://soundcloud.com/*"
+      ]
+    }
+  ]
 }
