@@ -1,15 +1,23 @@
 declare type MessageRequest = {
-    type: 'prev' | 'next' | 'play' | 'pause' | 'toggle' | 'toggle' | 'unfav' | 'fav' | 'repeat' | 'shuffle' | 'mute' | 'unmute' | 'up' | 'down' | 'seekb' | 'seekf'
+    type: MessageType
+    data: void
+    res: void
 } | {
     type: 'playerStateUpdate'
-    data: PlayerState
+    data: void
+    res: PlayerState
 }
+
+declare type MessageType = 'prev' | 'next' | 'play' | 'pause' | 'toggle' | 'toggle' | 'unfav' | 'fav' | 'repeat' | 'shuffle' | 'mute' | 'unmute' | 'up' | 'down' | 'seekb' | 'seekf' | ''
+declare type MessageType_popup = `popup:${MessageType}`
+declare type MessageType_soundcloundPage = `sc:${MessageType}`
 
 declare type MessageResponse = void
 
-declare function browserRuntimeOnMessage(callback: (type: MessageRequest) => Promise<MessageResponse>): void
+declare function RuntimeOnMessage(callback: <Req extends MessageRequest, Res = Req['res']>(type: Req) => Promise<Res>): void
 
 declare type PlayerState = {
+    /**maybe is null, use ?. */
     audioEl: HTMLAudioElement
     duration: number
     currentTime: number
