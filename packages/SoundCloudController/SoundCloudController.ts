@@ -1,4 +1,5 @@
-import { tassign, dq1, tentries } from "../utils/utils"
+import { AsyncLock } from "../utils/AsyncLock"
+import { tassign, dq1, tentries, waitLoopCallback } from "../utils/utils"
 
 export default class SoundCloudController {
     titleEl: HTMLAnchorElement
@@ -11,13 +12,13 @@ export default class SoundCloudController {
     shuffleBtnEl: HTMLButtonElement
     volumeBtnEl: HTMLButtonElement
 
-    tarAudioEl: HTMLAudioElement
+    audioEl: HTMLAudioElement
+    audioElLock = new AsyncLock()
 
     playerState = {} as PlayerState
 
     constructor() {
         this.initEl()
-        this.initAudioElEvents()
     }
 
     protected initEl() {
@@ -31,19 +32,24 @@ export default class SoundCloudController {
             repectBtnEl: dq1('.repeatControl'),
             shuffleBtnEl: dq1('.shuffleControl'),
             volumeBtnEl: dq1('.volume button[type="button"]'),
+        })
 
+        waitLoopCallback(() => !!dq1('#audioel-list-container [data-index="1"]'), 5000).then(() => {
+            this.audioElLock.ok()
             // ? maybe not data-index="1"
-            tarAudioEl: dq1('#audioel-list-container [data-index="1"]')
+            this.audioEl = dq1('#audioel-list-container [data-index="1"]')
+            this.initAudioElEvents()
         })
     }
 
     protected audioElBaseEventMap: AudioElEventMap = {
         play: () => this.setPlayerState({ isPlaying: true }),
         pause: () => this.setPlayerState({ isPlaying: false }),
-        timeupdate: () => this.setPlayerState({ currentTime: this.tarAudioEl.currentTime }),
-        durationchange: () => this.setPlayerState({ duration: this.tarAudioEl.duration })
+        // TODO? maybe not use this
+        timeupdate: () => this.setPlayerState({ currentTime: this.audioEl.currentTime }),
+        durationchange: () => this.setPlayerState({ duration: this.audioEl.duration })
         ,
-        // ? isloading state
+        // TODO? isloading state
         // waiting: () => 1,
         // canplay: () => 1,
         // canplaythrough: () => 1,
@@ -51,10 +57,10 @@ export default class SoundCloudController {
     }
     protected audioElObserver: MutationObserver
     protected initAudioElEvents() {
-        if (!this.tarAudioEl) throw new Error('No audio el has be created')
+        if (!this.audioEl) throw new Error('No audio el has be created')
 
         tentries(this.audioElBaseEventMap).forEach(([event, fn]) => {
-            this.tarAudioEl.addEventListener(event, fn as any)
+            this.audioEl.addEventListener(event, fn as any)
         })
 
         this.audioElObserver = new MutationObserver((mutationList) => {
@@ -70,7 +76,7 @@ export default class SoundCloudController {
             }
         })
 
-        this.audioElObserver.observe(this.tarAudioEl, { attributes: true })
+        this.audioElObserver.observe(this.audioEl, { attributes: true })
     }
 
     // TODO action in origin soundCloud page
@@ -99,32 +105,33 @@ export default class SoundCloudController {
 
     forceGetPlayerState(): PlayerState {
         return {
-            audioEl: this.tarAudioEl,
-            duration: this.tarAudioEl.duration,
-            currentTime: this.tarAudioEl.currentTime,
-            isPlaying: !this.tarAudioEl.paused,
-
-            ...this.getArtistInfo(),
-
-            trackName: this.titleEl.textContent,
-            trackLink: this.titleEl.href,
-
-            volume: this.tarAudioEl.volume,
-
-            isFav: this.favBtnEl.classList.contains('sc-button-selected'),
+            audioEl: this.audioEl,
+            duration: this.audioEl.duration,
+            currentTime: this.audioEl.currentTime,
+            isPlaying: !this.audioEl.paused,
+            volume: this.audioEl.volume,
             repectMode: (this.repectBtnEl.classList.contains('m-one') && 'one') ||
                 (this.repectBtnEl.classList.contains('m-all') && 'all') ||
                 'none',
             isShuffle: this.shuffleBtnEl.classList.contains('m-shuffling'),
-            isMute: this.volumeBtnEl.classList.contains('muted')
+            isMute: this.volumeBtnEl.classList.contains('muted'),
+            ...this.getTrackInfo(),
         }
     }
 
-    getArtistInfo() {
+    getTrackInfo() {
         return {
             artwork: this.artworkEl.style.backgroundImage.match(/^url\(\"(.*)\"\)$/)?.[1] ?? '',
             artist: this.artistEl.textContent,
             artLink: this.artistEl.href,
+            trackName: this.titleEl.textContent,
+            trackLink: this.titleEl.href,
+            isFav: this.favBtnEl.classList.contains('sc-button-selected'),
         }
+    }
+
+    async getAudioEl() {
+        await this.audioElLock.waiting()
+        return this.audioEl
     }
 }
