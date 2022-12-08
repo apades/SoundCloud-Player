@@ -1,5 +1,7 @@
 import Messager from "."
 
+import { defineExtensionMessaging, ProtocolWithReturn } from "@webext-core/messaging"
+
 type CusMsgMap = {
     'onlySendNull': null
     'onlySend': {
@@ -53,4 +55,13 @@ messager.onMsg('send&back', (data, sender) => {
     }
 })
 
+
+interface ProtocolMap {
+    message1: null;                              // No data and no return type
+    message2: { data: number, state: 2 };                                 // Only data
+    message3: ProtocolWithReturn<undefined, boolean>; // Only a return type
+    message4: ProtocolWithReturn<string, boolean>;    // Data and return type
+}
+
+let { onMessage, sendMessage } = defineExtensionMessaging<ProtocolMap>()
 

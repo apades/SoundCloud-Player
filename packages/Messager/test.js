@@ -1,6 +1,14 @@
 import Messager from './index'
-/**@type {Messager<CusMsgMapjs>} */
+import {
+    defineExtensionMessaging as _defineExtensionMessaging
+} from '@webext-core/messaging'
+/**@type {Messager<ProtocolMap>} */
 let messager = new Messager()
+
+/**@type {typeof _defineExtensionMessaging<ProtocolMap>} */
+let defineExtensionMessaging = _defineExtensionMessaging
+let { sendMessage } = defineExtensionMessaging()
+sendMessage('')
 
 messager.sendMsg({
     type: 'onlySendNull',
