@@ -47,6 +47,12 @@ export let waitLoopCallback: WaitLoop = (cb, option = 5000) => {
                     }, 500)
                 } else return res(true)
             }
+            loop()
         }
     })
+}
+
+export function formatTime2realTime(time: string): number {
+    let [min, sec] = time.split(':')
+    return +min * 60 + +sec
 }

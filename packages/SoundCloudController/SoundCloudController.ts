@@ -1,5 +1,5 @@
 import { AsyncLock } from "../utils/AsyncLock"
-import { tassign, dq1, tentries, waitLoopCallback } from "../utils/utils"
+import { tassign, dq1, tentries, waitLoopCallback, formatTime2realTime } from "../utils/utils"
 
 export default class SoundCloudController {
     titleEl: HTMLAnchorElement
@@ -23,23 +23,32 @@ export default class SoundCloudController {
 
     protected initEl() {
         tassign<SoundCloudController>(this, {
-            titleEl: dq1('a.playbackSoundBadge__titleLink'),
-            artistEl: dq1('a.playbackSoundBadge__lightLink'),
-            artworkEl: dq1('.playbackSoundBadge span.sc-artwork'),
+            // titleEl: dq1('a.playbackSoundBadge__titleLink'),
+            // artistEl: dq1('a.playbackSoundBadge__lightLink'),
+            // artworkEl: dq1('.playbackSoundBadge span.sc-artwork'),
             playBtnEl: dq1('.playControl.sc-ir.playControls__control.playControls__play'),
 
-            favBtnEl: dq1('.playbackSoundBadge__like'),
+            // favBtnEl: dq1('.playbackSoundBadge__like'),
             repectBtnEl: dq1('.repeatControl'),
             shuffleBtnEl: dq1('.shuffleControl'),
             volumeBtnEl: dq1('.volume button[type="button"]'),
         })
 
-        waitLoopCallback(() => !!dq1('#audioel-list-container [data-index="1"]'), 5000).then(() => {
-            this.audioElLock.ok()
-            // ? maybe not data-index="1"
-            this.audioEl = dq1('#audioel-list-container [data-index="1"]')
-            this.initAudioElEvents()
-        })
+        waitLoopCallback(() => !!dq1('#audioel-list-container [data-index="1"]'), 5000)
+            .then(() => {
+                this.audioElLock.ok()
+                console.log('initEl ok')
+
+                tassign<SoundCloudController>(this, {
+                    titleEl: dq1('a.playbackSoundBadge__titleLink'),
+                    artistEl: dq1('a.playbackSoundBadge__lightLink'),
+                    artworkEl: dq1('.playbackSoundBadge span.sc-artwork'),
+                    favBtnEl: dq1('.playbackSoundBadge__like'),
+                    // ? maybe not data-index="1"
+                    audioEl: dq1('#audioel-list-container [data-index="1"]')
+                })
+                this.initAudioElEvents()
+            })
     }
 
     protected audioElBaseEventMap: AudioElEventMap = {
@@ -106,7 +115,7 @@ export default class SoundCloudController {
     forceGetPlayerState(): PlayerState {
         return {
             audioEl: this.audioEl,
-            duration: this.audioEl.duration,
+            duration: this.audioEl.duration || formatTime2realTime(dq1('.playbackTimeline__duration span[aria-hidden]').textContent),
             currentTime: this.audioEl.currentTime,
             isPlaying: !this.audioEl.paused,
             volume: this.audioEl.volume,
