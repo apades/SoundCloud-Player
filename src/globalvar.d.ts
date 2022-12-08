@@ -10,7 +10,7 @@ declare global {
     interface SoundCloudControllerExt extends InstanceType<typeof _SoundCloudControllerExt> { }
 
     var Messager: typeof _Messager
-    interface Messager extends InstanceType<typeof _Messager> { }
+    interface Messager<T> extends InstanceType<typeof _Messager<T>> { }
 
     var browser: any
 }
