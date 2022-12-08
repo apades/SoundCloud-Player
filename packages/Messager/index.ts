@@ -5,8 +5,8 @@ export default class Messager<MsgMap = dykey>{
         [T in keyof MsgMap]: ((
             data: MsgMap[T],
             sender: chrome.runtime.MessageSender,
-            sendResponse: (response?: ResMsgType<MsgMap, keyof MsgMap>) => void
-        ) => void)[]
+            // sendResponse: (response?: ResMsgType<MsgMap, keyof MsgMap>) => void
+        ) => Promise<ResMsgType<MsgMap, T>> | ResMsgType<MsgMap, T>)[]
     } = {} as any
     isFail: boolean
 
@@ -33,9 +33,10 @@ export default class Messager<MsgMap = dykey>{
                     console.log('💬rc:onMsg', type, msgData)
 
                     if (this.onMsgEventMap[type]) {
-                        this.onMsgEventMap[type].forEach((fn) =>
-                            fn(msgData.data as any, sender, sendRes)
-                        )
+                        this.onMsgEventMap[type].forEach(async (fn) => {
+                            let res = await fn(msgData.data as any, sender)
+                            res && sendRes(res)
+                        })
                     }
                 }
             )
@@ -70,8 +71,9 @@ export default class Messager<MsgMap = dykey>{
             data: Omit<MsgMap[T], '$res'>,
             sender: chrome.runtime.MessageSender,
             // sendResponse: (response?: ResMsgType<MsgMap, T>) => void
-        ) => ResMsgType<MsgMap, T>
+        ) => Promise<ResMsgType<MsgMap, T>> | ResMsgType<MsgMap, T>
     ) {
+        if (this.isFail) return console.error('Not support chrome messager on this page')
         this.onMsgEventMap[type] = this.onMsgEventMap[type] ?? []
         this.onMsgEventMap[type].push(callback)
     }
@@ -82,7 +84,7 @@ export default class Messager<MsgMap = dykey>{
             data: Omit<MsgMap[T], '$res'>,
             sender: chrome.runtime.MessageSender,
             // sendResponse: (response?: ResMsgType<MsgMap, T>) => void
-        ) => ResMsgType<MsgMap, T>
+        ) => Promise<ResMsgType<MsgMap, T>> | ResMsgType<MsgMap, T>
     ): void {
         this.onMsgEventMap[type] = this.onMsgEventMap[type] ?? []
         let index = this.onMsgEventMap[type].findIndex((fn) => fn === callback)
