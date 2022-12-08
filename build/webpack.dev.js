@@ -8,14 +8,15 @@ const config = {
     mode: 'development',
     devtool: 'inline-source-map',
     entry: {
-        'SoundCloudControllerExt': pr('../packages/SoundCloudController/SoundCloudControllerExt.ts')
+        'SoundCloudControllerExt': pr('../packages/SoundCloudController/SoundCloudControllerExt.ts'),
+        'Messager': pr('../packages/Messager/index.ts')
     },
     module: {
         rules: [
             {
-                test: /\.ts$/,
+                test: /\.[tj]s$/,
                 use: [{
-                    loader: 'ts-loader',
+                    loader: 'babel-loader',
                 }],
                 include: /(packages)/
                 // exclude: /(node_modules)|(src)/,
