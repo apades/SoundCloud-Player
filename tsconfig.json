@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "outDir": "src/lib",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "lib": [
+      "es2020",
+      "dom",
+      "webworker"
+    ],
+    "removeComments": true,
+    "target": "es5",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "src/globalvar.d.ts"
+    ]
+  },
+  "include": [
+    "packages",
+    "src"
+  ]
+}
