@@ -1,13 +1,9 @@
 import { AsyncLock } from "../utils/AsyncLock"
-import { tassign, dq1, tentries, waitLoopCallback, formatTime2realTime } from "../utils/utils"
+import { tassign, dq1, tentries, waitLoopCallback, formatTime2realTime, wait } from "../utils/utils"
 
 export default class SoundCloudController {
-    titleEl: HTMLAnchorElement
-    artistEl: HTMLAnchorElement
-    artworkEl: HTMLSpanElement
     playBtnEl: HTMLDivElement
 
-    favBtnEl: HTMLButtonElement
     repectBtnEl: HTMLButtonElement
     shuffleBtnEl: HTMLButtonElement
     volumeBtnEl: HTMLButtonElement
@@ -21,47 +17,37 @@ export default class SoundCloudController {
         this.initEl()
     }
 
-    protected initEl() {
+    protected async initEl() {
         tassign<SoundCloudController>(this, {
-            // titleEl: dq1('a.playbackSoundBadge__titleLink'),
-            // artistEl: dq1('a.playbackSoundBadge__lightLink'),
-            // artworkEl: dq1('.playbackSoundBadge span.sc-artwork'),
             playBtnEl: dq1('.playControl.sc-ir.playControls__control.playControls__play'),
-
-            // favBtnEl: dq1('.playbackSoundBadge__like'),
             repectBtnEl: dq1('.repeatControl'),
             shuffleBtnEl: dq1('.shuffleControl'),
             volumeBtnEl: dq1('.volume button[type="button"]'),
         })
 
-        waitLoopCallback(() => !!dq1('#audioel-list-container [data-index="1"]'), 5000)
-            .then(() => {
-                this.audioElLock.ok()
-                console.log('initEl ok')
+        await waitLoopCallback(() => !!dq1('#audioel-list-container [data-index="1"]'))
+        this.playBtnEl.click()
 
-                tassign<SoundCloudController>(this, {
-                    titleEl: dq1('a.playbackSoundBadge__titleLink'),
-                    artistEl: dq1('a.playbackSoundBadge__lightLink'),
-                    artworkEl: dq1('.playbackSoundBadge span.sc-artwork'),
-                    favBtnEl: dq1('.playbackSoundBadge__like'),
-                    // ? maybe not data-index="1"
-                    audioEl: dq1('#audioel-list-container [data-index="1"]')
-                })
-                this.initAudioElEvents()
-            })
+        await waitLoopCallback(() => !!dq1('#audioel-list-container [msaudiocategory="BackgroundCapableMedia"]'), 5000)
+        this.audioElLock.ok()
+        console.log('initEl ok')
+
+        tassign<SoundCloudController>(this, {
+            audioEl: dq1('#audioel-list-container [msaudiocategory="BackgroundCapableMedia"]')
+        })
+        this.initAudioElEvents()
     }
 
     protected audioElBaseEventMap: AudioElEventMap = {
         play: () => this.setPlayerState({ isPlaying: true }),
         pause: () => this.setPlayerState({ isPlaying: false }),
-        // TODO? maybe not use this
-        timeupdate: () => this.setPlayerState({ currentTime: this.audioEl.currentTime }),
+        // ? maybe not use this
+        // timeupdate: () => this.setPlayerState({ currentTime: this.audioEl.currentTime }),
         durationchange: () => this.setPlayerState({ duration: this.audioEl.duration })
         ,
-        // TODO? isloading state
-        // waiting: () => 1,
+        // TODO isloading state
+        // waiting: () => this.setPlayerState({ isPlaying: false }),
         // canplay: () => 1,
-        // canplaythrough: () => 1,
         // progress: () => 1,
     }
     protected audioElObserver: MutationObserver
@@ -80,6 +66,7 @@ export default class SoundCloudController {
                     if (!src) return
 
                     let newPlayerState = this.forceGetPlayerState()
+                    console.log('audio update', newPlayerState)
                     this.setPlayerState(newPlayerState)
                 }
             }
@@ -89,6 +76,29 @@ export default class SoundCloudController {
     }
 
     // TODO action in origin soundCloud page
+    // protected observer:MutationObserver = new MutationObserver((mutationList) => {
+    //     for (const mutation of mutationList) {
+    //         if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+    //             const el = mutation.target as HTMLAudioElement,
+    //                 src = el.getAttribute('src')
+    //             if (!src) return
+
+    //             let newPlayerState = this.forceGetPlayerState()
+    //             this.setPlayerState(newPlayerState)
+    //         }
+    //     }
+    // }) 
+    bindElEvent(el: HTMLElement, type: 'click' | 'attr') {
+        switch (type) {
+            case 'click': {
+                el.addEventListener('click', () => this.setPlayerState(this.forceGetPlayerState()))
+                break
+            }
+            case 'attr': {
+
+            }
+        }
+    }
 
     setPlayerState(newState: Partial<PlayerState>) {
         let isUpdate = tentries(newState).find(([key, val]) =>
@@ -96,7 +106,7 @@ export default class SoundCloudController {
         )
 
         if (isUpdate) {
-            tassign(this.playerState, newState)
+            tassign(this.playerState, { ...this.forceGetPlayerState(), ...newState })
             this.emitPlayerStateChange()
         }
     }
@@ -129,13 +139,18 @@ export default class SoundCloudController {
     }
 
     getTrackInfo() {
+        let titleEl = dq1<HTMLAnchorElement>('a.playbackSoundBadge__titleLink'),
+            artworkEl = dq1('.playbackSoundBadge span.sc-artwork'),
+            artistEl = dq1<HTMLAnchorElement>('a.playbackSoundBadge__lightLink'),
+            favBtnEl = dq1('.playbackSoundBadge__like')
+
         return {
-            artwork: this.artworkEl.style.backgroundImage.match(/^url\(\"(.*)\"\)$/)?.[1] ?? '',
-            artist: this.artistEl.textContent,
-            artLink: this.artistEl.href,
-            trackName: this.titleEl.textContent,
-            trackLink: this.titleEl.href,
-            isFav: this.favBtnEl.classList.contains('sc-button-selected'),
+            artwork: artworkEl.style.backgroundImage.match(/^url\(\"(.*)\"\)$/)?.[1] ?? '',
+            artist: artistEl.textContent,
+            artLink: artistEl.href,
+            trackName: titleEl.children[1].textContent,
+            trackLink: titleEl.href,
+            isFav: favBtnEl.classList.contains('sc-button-selected'),
         }
     }
 

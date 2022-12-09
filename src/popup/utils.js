@@ -5,7 +5,7 @@ function isChrome() {
 async function queue(request, value) {
   if (!request) return null;
 
-  let r = new Promise(async(resolve, reject) => {
+  let r = new Promise(async (resolve, reject) => {
     request = String(request).toLowerCase();
     let results = await browser.tabs.query({ url: '*://soundcloud.com/*' });
 
@@ -33,26 +33,26 @@ async function queue(request, value) {
 async function checkMultipleWindow() {
   if (typeof loopRequestData != 'function') return;
 
-  let views = browser.extension.getViews(), l = views.length;
-  // console.log('hello');
-  if (l == 1 || (l > 1 && views[0] == this)) {
-    console.log('main channel');
-    setInterval(loopRequestData, 1000);
-    if (or) {
-      clearInterval(checkTimer);
-    }
-  } else if (or == false) {
-    console.log('initializing');
-    checkTimer = setInterval(checkMultipleWindow, 1000)
-    or = true;
-  }
+  // let views = browser.extension.getViews(), l = views.length;
+  // // console.log('hello');
+  // if (l == 1 || (l > 1 && views[0] == this)) {
+  //   console.log('main channel');
+  //   setInterval(loopRequestData, 1000);
+  //   if (or) {
+  //     clearInterval(checkTimer);
+  //   }
+  // } else if (or == false) {
+  //   console.log('initializing');
+  //   checkTimer = setInterval(checkMultipleWindow, 1000)
+  //   or = true;
+  // }
 }
 
 async function loopRequestData() {
   queue('smart-request-data').then((val) => {
     if (val != null && val != {}) {
       // console.log(val);
-        
+
       // Controller
       if (typeof toggleElements === 'function') {
         toggleElements(true);
@@ -99,7 +99,7 @@ async function openSCTab() {
   if (!currentTab) {
     return false;
   }
-  
+
   // -> If no Sc Tab, Make one
   if (!ScTab) {
     await browser.tabs.create({ url: getStartPage() });
@@ -127,7 +127,7 @@ async function openSCTab() {
 }
 
 function fixedEncoder(str) {
-  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
     return '%' + c.charCodeAt(0).toString(16);
   });
 }
@@ -137,7 +137,7 @@ function openURL(link) {
 }
 
 function copyToClipboard(text) {
-  var input = $('<input>'), 
+  var input = $('<input>'),
     style = {
       'position': 'fixed',
       'opacity': 0
@@ -168,7 +168,7 @@ function updateThemeColor(color) {
   if (!color) {
     color = localStorage.getItem('themecolor');
   }
-  if (color != localStorage.getItem('themecolor')){
+  if (color != localStorage.getItem('themecolor')) {
     localStorage.setItem('themecolor', color);
   }
   $(':root').css('--theme-color', color);
@@ -178,7 +178,7 @@ function updateBGcolor(color) {
   if (!color) {
     color = localStorage.getItem('bgcolor');
   }
-  if (color != localStorage.getItem('bgcolor')){
+  if (color != localStorage.getItem('bgcolor')) {
     localStorage.setItem('bgcolor', color);
   }
   $(':root').css('--bg-color', color);
@@ -187,7 +187,7 @@ function updateBGcolor(color) {
 function updateFont(font) {
   if (!font) {
     font = localStorage.getItem('font');
-  } else if (font != localStorage.getItem('font')){
+  } else if (font != localStorage.getItem('font')) {
     localStorage.setItem('font', font);
   }
   $(':root').css('--custom-font', font);
@@ -206,7 +206,7 @@ function updateFontSize(px) {
 }
 
 function toggleDarkmode() {
-  darkmode(dark =! dark);
+  darkmode(dark = !dark);
 }
 
 function darkmode(val) {
@@ -236,19 +236,19 @@ function loc(val) {
 }
 
 function initKeyboardBinds() {
-  $('input,select,textarea').keydown(function(e) {
+  $('input,select,textarea').keydown(function (e) {
     e.stopPropagation();
   });
   const list = {
     // keycode, queue cmd, shift? 
-    32: { 'false':  'toggle' },
-    38: { 'true' :      'up' },
-    40: { 'true' :    'down' },
-    77: { 'false':    'mute' },
-    76: { 'true' :  'repeat', 'false':   'fav' },
-    83: { 'true' : 'shuffle' },
-    37: { 'true' :    'prev', 'false': 'seekb' },
-    39: { 'true' :    'next', 'false': 'seekf' },
+    32: { 'false': 'toggle' },
+    38: { 'true': 'up' },
+    40: { 'true': 'down' },
+    77: { 'false': 'mute' },
+    76: { 'true': 'repeat', 'false': 'fav' },
+    83: { 'true': 'shuffle' },
+    37: { 'true': 'prev', 'false': 'seekb' },
+    39: { 'true': 'next', 'false': 'seekf' },
   };
 
   $('body').keydown(function (e) {
@@ -273,7 +273,7 @@ function initKeyboardBinds() {
 }
 
 function startMarquees() {
-  if (!$().marquee || ( (!settings['apply_marquee_to_default'] && getThemeName() == 'default') && loc('popup.html') )) return;
+  if (!$().marquee || ((!settings['apply_marquee_to_default'] && getThemeName() == 'default') && loc('popup.html'))) return;
   if (!settings['back-and-forth']) {
     $('.marquee').bind('finished', () => {
       setTimeout(() => {
@@ -283,7 +283,7 @@ function startMarquees() {
         $('.marquee').marquee('resume');
       }, isDuplicationEnabled() ? getPauseTime() : getTextVisibleDuration() + getPauseTime());
     }).marquee({
-      direction: 'left', 
+      direction: 'left',
       duration: getTextVisibleDuration(),
       pauseOnHover: loc('embed') ? false : true,
       startVisible: true,
@@ -292,12 +292,12 @@ function startMarquees() {
     });
   } else {
     $('.title').wrap('<div class="title-mask"></div>').addClass('breathing').removeClass('title');
-    $('.breathing').each((i,el) => {
+    $('.breathing').each((i, el) => {
       let width = el.clientWidth,
         containerWidth = el.parentElement.clientWidth,
         offset = width - containerWidth;
 
-      $(el.parentElement).css('-webkit-mask-image', width < containerWidth*1.2 ? 'none' : 'linear-gradient(90deg,transparent 0,#000 6px,#000 calc(100% - 12px),transparent)');
+      $(el.parentElement).css('-webkit-mask-image', width < containerWidth * 1.2 ? 'none' : 'linear-gradient(90deg,transparent 0,#000 6px,#000 calc(100% - 12px),transparent)');
 
       if (offset > 0) {
         el.style.setProperty('--max-offset', offset + 'px');
@@ -312,12 +312,12 @@ function startMarquees() {
 }
 
 function getTextVisibleDuration() {
-  if (localStorage.getItem('duration')) return Number( localStorage.getItem('duration') );
+  if (localStorage.getItem('duration')) return Number(localStorage.getItem('duration'));
   return 5000;
 }
 
 function getPauseTime() {
-  if (localStorage.getItem('pause')) return Number( localStorage.getItem('pause') );
+  if (localStorage.getItem('pause')) return Number(localStorage.getItem('pause'));
   return 5000;
 }
 
@@ -326,7 +326,7 @@ function isDuplicationEnabled() {
 }
 
 async function checkDisplayArtwork() {
-  let available = Bool( localStorage.getItem('display-artwork') );
+  let available = Bool(localStorage.getItem('display-artwork'));
   toggleArtwork(available);
   if (loc('settings.html') && available) $('#display-artwork').attr('checked', '');
 }
@@ -334,7 +334,7 @@ async function checkDisplayArtwork() {
 function toggleArtwork(val) {
   if (val == null) return;
 
-  let hidden = (val == false), 
+  let hidden = (val == false),
     isCompactInSettingsPage = (loc('settings.html') && localStorage.getItem('compact_in_settings') != null && localStorage.getItem('compact_in_settings') == 'true');
   if (getThemeName() == 'compact' || isCompactInSettingsPage) {
     $('#controller').css('width', hidden ? '250px' : '200px');
@@ -351,7 +351,7 @@ function toggleArtwork(val) {
 }
 
 function replaceText(text, json) {
-  if (!json) json = JSON.parse( sessionStorage.getItem('data') );
+  if (!json) json = JSON.parse(sessionStorage.getItem('data'));
   text = text.replace('%title%', json['title']).replace('%artist%', json['artist']).replace('%url%', json['link']);
   return text;
 }

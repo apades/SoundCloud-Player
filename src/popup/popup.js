@@ -15,6 +15,60 @@ document.addEventListener('DOMContentLoaded', () => {
   ]);
 });
 
+/**@type {Messager<MsgMap>} */
+let messager = new Messager()
+
+let currentTimeUpdateTimmer
+/** ! dot not use this to set state, use state
+ * @type {Omit<PlayerState,'audioEl'>} */
+let _state = {},
+  /**@type {{[K in keyof typeof _state]:(val:typeof _state[K])=>void}} */
+  _stateElMap = {
+    artist: (v) => $('.title').text(`${state.trackName}-${state.artist}`),
+    trackName: (v) => $('.title').text(`${state.trackName}-${state.artist}`),
+    trackLink: (v) => $('.title').attr('href', v),
+    artwork: (v) => $('#artwork').css('background-image', `url(${v.replace('50x50', '500x500').replace('120x120', '500x500')})`),
+    currentTime: (v) => {
+      $('#current').text(~~v)
+      $('#share_current_time').val(~~v)
+    },
+    isPlaying: (v) => {
+      if (v) currentTimeUpdateTimmer = setInterval(() => {
+        state.currentTime = (state.currentTime ?? 0) + 1
+      }, 1000)
+      else clearInterval(currentTimeUpdateTimmer)
+      $('#toggle').attr('playing', v)
+    },
+    duration: (v) => $('#end').text(~~v),
+    isFav: (v) => $('#fav').attr('favorite', v),
+    isShuffle: (v) => $('#shuffle').attr('shuffle', v),
+    repectMode: (v) => $('#repeat').attr('mode', v),
+    volume: (v) => $('#current-volume').text(Math.floor(v / 100) + ' %'),
+    isMute: (v) => $('#fav').attr('favorite', v)
+  }
+let state = new Proxy(_state, {
+  get: (tar, key) => _state[key],
+  set: (tar, key, val) => {
+    if (key === 'audioEl') return false
+    if (_state[key] === val) return false
+    console.log('update', key, val)
+    _state[key] = val
+    _stateElMap[key]?.(val)
+    return true
+  }
+})
+
+messager.sendMsg({
+  type: 'getPlayerState',
+}).then((res) => {
+  console.log('getPlayerState', res)
+  Object.entries(res).forEach(([key, val]) => (state[key] = val))
+})
+
+messager.onMsg('sc:stateUpdate', (res) => {
+  Object.entries(res).forEach(([key, val]) => (state[key] = val))
+})
+
 // Initialize:
 async function init() {
   for (key in templates) {
@@ -37,7 +91,7 @@ async function checkElements() {
 
   if (settings['simple-label']) {
     $('#store').text('SC PLYR');
-    $('#share_btn,#settings,#thelink > div.right > div:nth-child(1) > span').contents().each(function() { if (this.nodeType === Node.TEXT_NODE) this.remove(); });
+    $('#share_btn,#settings,#thelink > div.right > div:nth-child(1) > span').contents().each(function () { if (this.nodeType === Node.TEXT_NODE) this.remove(); });
   }
 }
 
@@ -68,65 +122,65 @@ async function toggleElements(arg) {
 }
 
 async function update(val) {
-  // if value is null or isn't json, return. 
-  if (val == null || typeof val !== 'object') return;
+  // // if value is null or isn't json, return. 
+  // if (val == null || typeof val !== 'object') return;
 
-  // set artwork (text)
-  if (val['artwork'] != null) {
-    $('#artwork').css('background-image', val['artwork']);
-  }
+  // // set artwork (text)
+  // if (val['artwork'] != null) {
+  //   $('#artwork').css('background-image', val['artwork']);
+  // }
 
-  // set title (text)
-  if (val['title'] != null) {
-    $('.title,.breathing').text(replaceText(localStorage.getItem('trackdisplay'), val));
-    startMarquees();
-    $('.title,.breathing').attr('href', val['link']);
-  }
+  // // set title (text)
+  // if (val['title'] != null) {
+  //   $('.title,.breathing').text(replaceText(localStorage.getItem('trackdisplay'), val));
+  //   startMarquees();
+  //   $('.title,.breathing').attr('href', val['link']);
+  // }
 
-  // set current time & duration
-  if (val['time'] != null) {
-    let timeJson = val['time'];
+  // // set current time & duration
+  // if (val['time'] != null) {
+  //   let timeJson = val['time'];
 
-    if ($('#current').text() != timeJson['current']) {
-      $('#current').text(timeJson['current']);
-      $('#share_current_time').val(timeJson['current']);
-    }
-    if ($('#end').text() != timeJson['end']) {
-      $('#end').text(timeJson['end']);
-    }
-  }
+  //   if ($('#current').text() != timeJson['current']) {
+  //     $('#current').text(timeJson['current']);
+  //     $('#share_current_time').val(timeJson['current']);
+  //   }
+  //   if ($('#end').text() != timeJson['end']) {
+  //     $('#end').text(timeJson['end']);
+  //   }
+  // }
 
-  // set playing status (true/false)
-  if (val['playing'] != null) {
-    $('#toggle').attr( 'playing', val['playing'] );
-  }
+  // // set playing status (true/false)
+  // if (val['playing'] != null) {
+  //   $('#toggle').attr('playing', val['playing']);
+  // }
 
-  // set favorite status (true/false)
-  if (val['favorite'] != null) {
-    $('#fav').attr( 'favorite', val['favorite'] );
-  }
-  
-  // set shuffle status (true/false)
-  if (val['shuffle'] != null) {
-    $('#shuffle').attr( 'shuffle', val['shuffle'] );
-  }
-  
-  // set repeat status (one/all/none)
-  if (val['repeat'] != null) {
-    $('#repeat').attr( 'mode', val['repeat'] );
-  }
+  // // set favorite status (true/false)
+  // if (val['favorite'] != null) {
+  //   $('#fav').attr('favorite', val['favorite']);
+  // }
 
-  // set current volume (X%)
-  if (val['volume'] != null) {
-    $('#current-volume').text( Math.floor(val['volume']) + ' %' );
-  }
+  // // set shuffle status (true/false)
+  // if (val['shuffle'] != null) {
+  //   $('#shuffle').attr('shuffle', val['shuffle']);
+  // }
 
-  // set mute (true/false)
-  if (val['mute'] != null) {
-    val['mute'] ? $('#volume-icon').addClass('muted') : $('#volume-icon').removeClass('muted');
-  }
+  // // set repeat status (one/all/none)
+  // if (val['repeat'] != null) {
+  //   $('#repeat').attr('mode', val['repeat']);
+  // }
 
-  setShareLink(val);
+  // // set current volume (X%)
+  // if (val['volume'] != null) {
+  //   $('#current-volume').text(Math.floor(val['volume']) + ' %');
+  // }
+
+  // // set mute (true/false)
+  // if (val['mute'] != null) {
+  //   val['mute'] ? $('#volume-icon').addClass('muted') : $('#volume-icon').removeClass('muted');
+  // }
+
+  // setShareLink(val);
 }
 
 function setDefaultTheme() {
@@ -175,7 +229,7 @@ function registerAudioButtons() {
   });
 }
 
-async function registerEvents() { 
+async function registerEvents() {
   // Dark Mode
   if (localStorage.getItem('darkmode') != null) {
     dark = (localStorage.getItem('darkmode') === 'true');
@@ -189,12 +243,12 @@ async function registerEvents() {
   // Popout
   $('#P').on('click', async () => {
     let t = chrome.runtime.getURL(''); // 'chrome-extension://<extension-id>/'
-    await browser.tabs.query({active:true, url: `${t + (t.endsWith('/') ? '' : '/')}popup/*.html?p=1`}).then(async (val) => {
-        if (val[0] == null || (localStorage['popout-dupe'] != null && localStorage['popout-dupe'] == 'false')) {
-          await popup('../popup/popup.html?p=1', 'a');
-          return;
-        }
-        await browser.windows.update(val[0].windowId, {focused: true});
+    await browser.tabs.query({ active: true, url: `${t + (t.endsWith('/') ? '' : '/')}popup/*.html?p=1` }).then(async (val) => {
+      if (val[0] == null || (localStorage['popout-dupe'] != null && localStorage['popout-dupe'] == 'false')) {
+        await popup('../popup/popup.html?p=1', 'a');
+        return;
+      }
+      await browser.windows.update(val[0].windowId, { focused: true });
     });
     window.close();
   });
@@ -218,10 +272,10 @@ async function registerEvents() {
 
   // Social
   var socials = ['Twitter'];
-  for (var i in socials) with ({i:i}) {
-    var elem = $( '#social .' + socials[i].toLowerCase() );
+  for (var i in socials) with ({ i: i }) {
+    var elem = $('#social .' + socials[i].toLowerCase());
     elem.on('click', () => {
-      openURL( shareLink(socials[i]) );
+      openURL(shareLink(socials[i]));
     });
     elem.attr('title', 'Share on ' + socials[i])
   }
@@ -231,11 +285,11 @@ async function registerEvents() {
     if (text.includes(json['link']) && share_with_time) {
       text = text.replace(json['link'], json['link'] + '#t=' + json['time']['current']);
     }
-    copyToClipboard( text );
+    copyToClipboard(text);
   });
 
   $('.copynp').on('click', () => {
-    copyToClipboard( replaceText(templates['copy']) );
+    copyToClipboard(replaceText(templates['copy']));
   });
 
   $('#copy').focus(() => {
@@ -252,20 +306,20 @@ function setShareLink(val) {
   let copyLink = share_with_time ? `${data['link']}#t=${data['time']['current']}` : data['link'];
   $('#copy').val(copyLink);
   let selectable = share_with_time
-                && $('#copy')[0].selectionStart != null
-                && $(document.activeElement)[0] == $('#copy')[0];
+    && $('#copy')[0].selectionStart != null
+    && $(document.activeElement)[0] == $('#copy')[0];
   if (selectable) $('#copy').select();
 }
 
 function shareLink(social) {
   social = social.toLowerCase();
-  let data = JSON.parse( sessionStorage.getItem('data') ); 
+  let data = JSON.parse(sessionStorage.getItem('data'));
   // console.log(data);
-  let text = replaceText( templates[social] );
+  let text = replaceText(templates[social]);
   if (share_with_time) {
-    text = text.replace( data['link'], data['link'] + '#t=' + data['time']['current'] );
+    text = text.replace(data['link'], data['link'] + '#t=' + data['time']['current']);
   }
-  return links[social].replace( '%text%', fixedEncoder(text) );
+  return links[social].replace('%text%', fixedEncoder(text));
 }
 
 // Variables

@@ -50,6 +50,14 @@ declare type dykey<T = any> = {
     [key: string]: T
 }
 
+declare type MsgMap = {
+    'sc:trackChange': PlayerState
+    'sc:stateUpdate': PlayerState
+    'getPlayerState': {
+        $res: PlayerState
+    }
+}
+
 // declare type SoundCloudController = typeof import('../packages/SoundCloudController/SoundCloudControllerExt')
 // interface Window {
 //     SoundCloudController: typeof import('../packages/SoundCloudController/SoundCloudControllerExt')

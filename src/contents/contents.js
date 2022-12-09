@@ -1,8 +1,8 @@
-window.onload = (async() => {
+window.onload = (async () => {
   console.log(prefix, "Hi.");
 
   // Check if extension is reloaded
-  setInterval(async() => {
+  setInterval(async () => {
     try {
       let shit = await browser.runtime.getManifest();
     } catch {
@@ -15,6 +15,15 @@ window.onload = (async() => {
     }
   }, 10000);
 });
+
+let scController = new SoundCloudControllerExt()
+console.log('scController', scController)
+
+/**@type {Messager<MsgMap>} */
+let messager = new Messager()
+messager.onMsg('getPlayerState', () => {
+  return scController.forceGetPlayerState()
+})
 
 async function update() {
   json['title'] = getTitle();
@@ -31,7 +40,7 @@ async function update() {
   json['shuffle'] = isShuffling();
 }
 
-browser.runtime.onMessage.addListener(async function(request) {
+browser.runtime.onMessage.addListener(async function (request) {
   // Debug:
   // if (request.type != 'request-data') console.log('received:', request);
 
@@ -81,43 +90,43 @@ browser.runtime.onMessage.addListener(async function(request) {
       focus();
       break;
     }
-    case 'play':
-    case 'pause':
-    case 'toggle': {
-      let elem = $('.playControl.sc-ir.playControls__control.playControls__play')[0];
-      elem.click();
-      json['playing'] = elem.title.includes('Pause');
+    // case 'play':
+    // case 'pause':
+    // case 'toggle': {
+    //   let elem = $('.playControl.sc-ir.playControls__control.playControls__play')[0];
+    //   elem.click();
+    //   json['playing'] = elem.title.includes('Pause');
 
-      response = {'response': { 'playing': json['playing'], 'volume': json['volume'] } };
-      break;
-    }
-    case 'prev': {
-      $('.playControls__prev')[0].click();
-      await update();
-      response = json;
-      break;
-    }
-    case 'next': {
-      $('.playControls__next')[0].click();
-      await update();
-      response = json;
-      break;
-    }
-    case 'unfav':
-    case 'fav': {
-      let btn = $('.playbackSoundBadge__like')[0];
-      btn.click();
-      json['favorite'] = btn.title == "Unlike";
+    //   response = { 'response': { 'playing': json['playing'], 'volume': json['volume'] } };
+    //   break;
+    // }
+    // case 'prev': {
+    //   $('.playControls__prev')[0].click();
+    //   await update();
+    //   response = json;
+    //   break;
+    // }
+    // case 'next': {
+    //   $('.playControls__next')[0].click();
+    //   await update();
+    //   response = json;
+    //   break;
+    // }
+    // case 'unfav':
+    // case 'fav': {
+    //   let btn = $('.playbackSoundBadge__like')[0];
+    //   btn.click();
+    //   json['favorite'] = btn.title == "Unlike";
 
-      response = { 'response': {'favorite': json['favorite']} };
-      break;
-    }
+    //   response = { 'response': { 'favorite': json['favorite'] } };
+    //   break;
+    // }
     case 'repeat': {
       let btn = $('.repeatControl')[0];
       btn.click();
       json['repeat'] = getRepeatMode(); // none -> one -> all
 
-      response = { 'response': {'repeat': json['repeat']} };
+      response = { 'response': { 'repeat': json['repeat'] } };
       break;
     }
     case 'shuffle': {
@@ -125,7 +134,7 @@ browser.runtime.onMessage.addListener(async function(request) {
       btn.click();
       json['shuffle'] = isShuffling();
 
-      response = {'response': {'shuffle': json['shuffle']} };
+      response = { 'response': { 'shuffle': json['shuffle'] } };
       break;
     }
     case 'mute':
@@ -133,7 +142,7 @@ browser.runtime.onMessage.addListener(async function(request) {
       $('.volume button[type="button"]')[0].click();
       json['mute'] = $('.volume')[0].className.includes('muted');
 
-      response = { 'response': {'mute': json['mute']} };
+      response = { 'response': { 'mute': json['mute'] } };
       break;
     }
     case 'up':
@@ -180,7 +189,7 @@ browser.runtime.onMessage.addListener(async function(request) {
   return response;
 });
 
-var prefix = '[SoundCloud Player] ', 
+var prefix = '[SoundCloud Player] ',
   reloading = false,
   json = {
     'playing': false,

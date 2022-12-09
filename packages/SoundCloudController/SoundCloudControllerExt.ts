@@ -26,7 +26,13 @@ export default class SoundCloudControllerExt extends SoundCloudController {
                     dq1('.playControls__next').click()
                     break
                 }
-                // TODO volume up down
+                case 'unfav':
+                case 'fav': {
+                    // TODO network error
+                    dq1('.playbackSoundBadge__like').click()
+                    this.setPlayerState({ isFav: !this.playerState.isFav })
+                    break
+                }
             }
         })
     }
@@ -34,7 +40,7 @@ export default class SoundCloudControllerExt extends SoundCloudController {
     emitPlayerStateChange() {
         super.emitPlayerStateChange()
         chrome.runtime.sendMessage({
-            type: 'playerStateUpdate',
+            type: 'sc:stateUpdate',
             data: this.playerState
         })
             .catch(error => {
