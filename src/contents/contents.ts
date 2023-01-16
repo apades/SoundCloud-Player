@@ -1,8 +1,10 @@
-window.onload = (async() => {
+import * as utils from './utils'
+
+window.onload = (async () => {
   console.log(prefix, "Hi.");
 
   // Check if extension is reloaded
-  setInterval(async() => {
+  setInterval(async () => {
     try {
       let shit = await browser.runtime.getManifest();
     } catch {
@@ -17,25 +19,25 @@ window.onload = (async() => {
 });
 
 async function update() {
-  json['title'] = getTitle();
-  json['artist'] = getArtist();
-  json['artwork'] = getArtwork();
-  json['link'] = getLink();
-  json['playing'] = isPlaying();
-  json['favorite'] = isLiked();
-  json['time']['current'] = getCurrentTime();
-  json['time']['end'] = getEndTime();
-  json['volume'] = getVolume();
-  json['mute'] = isMuted();
-  json['repeat'] = getRepeatMode();
-  json['shuffle'] = isShuffling();
+  json['title'] = utils.getTitle();
+  json['artist'] = utils.getArtist();
+  json['artwork'] = utils.getArtwork();
+  json['link'] = utils.getLink();
+  json['playing'] = utils.isPlaying();
+  json['favorite'] = utils.isLiked();
+  json['time']['current'] = utils.getCurrentTime();
+  json['time']['end'] = utils.getEndTime();
+  json['volume'] = utils.getVolume();
+  json['mute'] = utils.isMuted();
+  json['repeat'] = utils.getRepeatMode();
+  json['shuffle'] = utils.isShuffling();
 }
 
-browser.runtime.onMessage.addListener(async function(request) {
+browser.runtime.onMessage.addListener(async function (request) {
   // Debug:
   // if (request.type != 'request-data') console.log('received:', request);
 
-  let response = {};
+  let response: Record<string, any> = {};
 
   $(document).click();
 
@@ -48,34 +50,34 @@ browser.runtime.onMessage.addListener(async function(request) {
     case 'smart-request-data': {
       response = {};
 
-      if (getTitle() != json['title']) {
+      if (utils.getTitle() != json['title']) {
         await update();
         response = json;
       }
-      if (isPlaying() != json['playing']) {
-        response['playing'] = isPlaying();
+      if (utils.isPlaying() != json['playing']) {
+        response['playing'] = utils.isPlaying();
       }
-      if (isLiked() != json['favorite']) {
-        response['favorite'] = isLiked();
+      if (utils.isLiked() != json['favorite']) {
+        response['favorite'] = utils.isLiked();
       }
-      if (getVolume() != json['volume']) {
-        response['volume'] = getVolume();
-        response['mute'] = isMuted();
+      if (utils.getVolume() != json['volume']) {
+        response['volume'] = utils.getVolume();
+        response['mute'] = utils.isMuted();
       }
-      if (getCurrentTime() != json['time']['current']) {
+      if (utils.getCurrentTime() != json['time']['current']) {
         response['time'] = {
-          'current': getCurrentTime(),
-          'end': getEndTime()
+          'current': utils.getCurrentTime(),
+          'end': utils.getEndTime()
         };
       }
-      if (isMuted() != json['mute']) {
-        response['mute'] = isMuted();
+      if (utils.isMuted() != json['mute']) {
+        response['mute'] = utils.isMuted();
       }
-      if (getRepeatMode() != json['repeat']) {
-        response['repeat'] = getRepeatMode();
+      if (utils.getRepeatMode() != json['repeat']) {
+        response['repeat'] = utils.getRepeatMode();
       }
-      if (isShuffling() != json['shuffle']) {
-        response['shuffle'] = isShuffling();
+      if (utils.isShuffling() != json['shuffle']) {
+        response['shuffle'] = utils.isShuffling();
       }
       break;
     }
@@ -90,7 +92,7 @@ browser.runtime.onMessage.addListener(async function(request) {
       elem.click();
       json['playing'] = elem.title.includes('Pause');
 
-      response = {'response': { 'playing': json['playing'], 'volume': json['volume'] } };
+      response = { 'response': { 'playing': json['playing'], 'volume': json['volume'] } };
       break;
     }
     case 'prev': {
@@ -111,23 +113,23 @@ browser.runtime.onMessage.addListener(async function(request) {
       btn.click();
       json['favorite'] = btn.title == "Unlike";
 
-      response = { 'response': {'favorite': json['favorite']} };
+      response = { 'response': { 'favorite': json['favorite'] } };
       break;
     }
     case 'repeat': {
       let btn = $('.repeatControl')[0];
       btn.click();
-      json['repeat'] = getRepeatMode(); // none -> one -> all
+      json['repeat'] = utils.getRepeatMode(); // none -> one -> all
 
-      response = { 'response': {'repeat': json['repeat']} };
+      response = { 'response': { 'repeat': json['repeat'] } };
       break;
     }
     case 'shuffle': {
       let btn = $('.shuffleControl')[0];
       btn.click();
-      json['shuffle'] = isShuffling();
+      json['shuffle'] = utils.isShuffling();
 
-      response = {'response': {'shuffle': json['shuffle']} };
+      response = { 'response': { 'shuffle': json['shuffle'] } };
       break;
     }
     case 'mute':
@@ -135,15 +137,15 @@ browser.runtime.onMessage.addListener(async function(request) {
       $('.volume button[type="button"]')[0].click();
       json['mute'] = $('.volume')[0].className.includes('muted');
 
-      response = { 'response': {'mute': json['mute']} };
+      response = { 'response': { 'mute': json['mute'] } };
       break;
     }
     case 'up':
     case 'down': { // volume up/down
-      request.type == 'up' ? volumeUp() : volumeDown();
-      json['volume'] = getVolume();
-      json['time']['current'] = getCurrentTime();
-      json['time']['end'] = getEndTime();
+      request.type == 'up' ? utils.volumeUp() : utils.volumeDown();
+      json['volume'] = utils.getVolume();
+      json['time']['current'] = utils.getCurrentTime();
+      json['time']['end'] = utils.getEndTime();
 
       response = { 'response': { 'time': json['time'], 'volume': json['volume'] } };
       break;
@@ -151,19 +153,19 @@ browser.runtime.onMessage.addListener(async function(request) {
     case 'seekb':
     case 'seekf': { // seek backward/forward
       if (request.type == 'seekb') {
-        seekBack();
+        utils.seekBack();
       } else if (request.type == 'seekf') {
-        seekForward();
+        utils.seekForward();
       }
-      json['time']['current'] = getCurrentTime();
-      json['time']['end'] = getEndTime();
+      json['time']['current'] = utils.getCurrentTime();
+      json['time']['end'] = utils.getEndTime();
 
       response = { 'response': { 'time': json['time'] } };
       break;
     }
     case 'ap': { // add to playlist
       focus();
-      new Promise((resolve) => {
+      new Promise<void>((resolve) => {
         $('.sc-button-more.sc-button-secondary.sc-button.sc-button-medium.sc-button-responsive')[0].click();
         console.log('1');
         resolve();
@@ -182,9 +184,9 @@ browser.runtime.onMessage.addListener(async function(request) {
   return response;
 });
 
-var prefix = '[SoundCloud Player] ', 
+var prefix = '[SoundCloud Player] ',
   reloading = false,
-  json = {
+  json: Record<string, any> = {
     'playing': false,
     'artwork': null,
     'link': null,

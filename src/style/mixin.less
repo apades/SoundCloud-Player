@@ -1,0 +1,95 @@
+.custom-scrollbar() {
+    &::-webkit-scrollbar-track {
+        background-color: transparent;
+        border-radius: @baseBorderRadius;
+    }
+
+    &::-webkit-scrollbar-track:hover {
+        // background-color: #f4f4f4;
+    }
+
+    &::-webkit-scrollbar {
+        width: 10px;
+        background-color: transparent;
+        border-radius: 16px;
+        // border: 5px solid #fff;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        // background-color: #babac0;
+        background: rgba(0, 0, 0, 0.12);
+        background-clip: content-box;
+        border: 2px solid transparent;
+        border-radius: 16px;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.24);
+        }
+    }
+
+    &::-webkit-scrollbar-button {
+        display: none;
+    }
+}
+
+.wh(@w, @h: @w) {
+    width: @w;
+    height: @h;
+}
+
+.mwh(@w, @h: @w) {
+    max-width: @w;
+    max-height: @h;
+}
+
+.mobile(@rules) {
+    @media screen and (max-width: 768px) {
+        @rules()
+    }
+}
+
+.f-center() {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.f-i-center() {
+    display: flex;
+    align-items: center;
+}
+
+.ab-center(@type: 'c') {
+    position: absolute;
+
+    & when (@type ='c') {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    & when (@type ='x') {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    & when (@type ='y') {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+.grid-box(@width) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, @width);
+    justify-content: space-around;
+}
+
+.line-clamp(@line) {
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: @line; //设置多行的行数
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+}
