@@ -1,7 +1,12 @@
-import * as utils from './utils'
+import { PlayerState } from '@root/store/playerState';
+import * as utils from './utils';
 
-window.onload = (async () => {
-  console.log(prefix, "Hi.");
+let prefix = '[SoundCloud Player] ',
+  reloading = false,
+  playerState = new PlayerState();
+
+window.onload = async () => {
+  console.log(prefix, 'Hi.');
 
   // Check if extension is reloaded
   setInterval(async () => {
@@ -16,21 +21,21 @@ window.onload = (async () => {
       }
     }
   }, 10000);
-});
+};
 
 async function update() {
-  json['title'] = utils.getTitle();
-  json['artist'] = utils.getArtist();
-  json['artwork'] = utils.getArtwork();
-  json['link'] = utils.getLink();
-  json['playing'] = utils.isPlaying();
-  json['favorite'] = utils.isLiked();
-  json['time']['current'] = utils.getCurrentTime();
-  json['time']['end'] = utils.getEndTime();
-  json['volume'] = utils.getVolume();
-  json['mute'] = utils.isMuted();
-  json['repeat'] = utils.getRepeatMode();
-  json['shuffle'] = utils.isShuffling();
+  playerState['title'] = utils.getTitle();
+  playerState['artist'] = utils.getArtist();
+  playerState['artwork'] = utils.getArtwork();
+  playerState['link'] = utils.getLink();
+  playerState['playing'] = utils.isPlaying();
+  playerState['favorite'] = utils.isLiked();
+  playerState['time']['current'] = utils.getCurrentTime();
+  playerState['time']['end'] = utils.getEndTime();
+  playerState['volume'] = utils.getVolume();
+  playerState['mute'] = utils.isMuted();
+  playerState['repeat'] = utils.getRepeatMode();
+  playerState['shuffle'] = utils.isShuffling();
 }
 
 browser.runtime.onMessage.addListener(async function (request) {
@@ -44,39 +49,39 @@ browser.runtime.onMessage.addListener(async function (request) {
   switch (request.type) {
     case 'request-data': {
       await update();
-      response = json;
+      response = playerState;
       break;
     }
     case 'smart-request-data': {
       response = {};
 
-      if (utils.getTitle() != json['title']) {
+      if (utils.getTitle() != playerState['title']) {
         await update();
-        response = json;
+        response = playerState;
       }
-      if (utils.isPlaying() != json['playing']) {
+      if (utils.isPlaying() != playerState['playing']) {
         response['playing'] = utils.isPlaying();
       }
-      if (utils.isLiked() != json['favorite']) {
+      if (utils.isLiked() != playerState['favorite']) {
         response['favorite'] = utils.isLiked();
       }
-      if (utils.getVolume() != json['volume']) {
+      if (utils.getVolume() != playerState['volume']) {
         response['volume'] = utils.getVolume();
         response['mute'] = utils.isMuted();
       }
-      if (utils.getCurrentTime() != json['time']['current']) {
+      if (utils.getCurrentTime() != playerState['time']['current']) {
         response['time'] = {
-          'current': utils.getCurrentTime(),
-          'end': utils.getEndTime()
+          current: utils.getCurrentTime(),
+          end: utils.getEndTime(),
         };
       }
-      if (utils.isMuted() != json['mute']) {
+      if (utils.isMuted() != playerState['mute']) {
         response['mute'] = utils.isMuted();
       }
-      if (utils.getRepeatMode() != json['repeat']) {
+      if (utils.getRepeatMode() != playerState['repeat']) {
         response['repeat'] = utils.getRepeatMode();
       }
-      if (utils.isShuffling() != json['shuffle']) {
+      if (utils.isShuffling() != playerState['shuffle']) {
         response['shuffle'] = utils.isShuffling();
       }
       break;
@@ -88,116 +93,114 @@ browser.runtime.onMessage.addListener(async function (request) {
     case 'play':
     case 'pause':
     case 'toggle': {
-      let elem = $('.playControl.sc-ir.playControls__control.playControls__play')[0];
+      let elem = $(
+        '.playControl.sc-ir.playControls__control.playControls__play'
+      )[0];
       elem.click();
-      json['playing'] = elem.title.includes('Pause');
+      playerState['playing'] = elem.title.includes('Pause');
 
-      response = { 'response': { 'playing': json['playing'], 'volume': json['volume'] } };
+      response = {
+        response: {
+          playing: playerState['playing'],
+          volume: playerState['volume'],
+        },
+      };
       break;
     }
     case 'prev': {
       $('.playControls__prev')[0].click();
       await update();
-      response = json;
+      response = playerState;
       break;
     }
     case 'next': {
       $('.playControls__next')[0].click();
       await update();
-      response = json;
+      response = playerState;
       break;
     }
     case 'unfav':
     case 'fav': {
       let btn = $('.playbackSoundBadge__like')[0];
       btn.click();
-      json['favorite'] = btn.title == "Unlike";
+      playerState['favorite'] = btn.title == 'Unlike';
 
-      response = { 'response': { 'favorite': json['favorite'] } };
+      response = { response: { favorite: playerState['favorite'] } };
       break;
     }
     case 'repeat': {
       let btn = $('.repeatControl')[0];
       btn.click();
-      json['repeat'] = utils.getRepeatMode(); // none -> one -> all
+      playerState['repeat'] = utils.getRepeatMode(); // none -> one -> all
 
-      response = { 'response': { 'repeat': json['repeat'] } };
+      response = { response: { repeat: playerState['repeat'] } };
       break;
     }
     case 'shuffle': {
       let btn = $('.shuffleControl')[0];
       btn.click();
-      json['shuffle'] = utils.isShuffling();
+      playerState['shuffle'] = utils.isShuffling();
 
-      response = { 'response': { 'shuffle': json['shuffle'] } };
+      response = { response: { shuffle: playerState['shuffle'] } };
       break;
     }
     case 'mute':
     case 'unmute': {
       $('.volume button[type="button"]')[0].click();
-      json['mute'] = $('.volume')[0].className.includes('muted');
+      playerState['mute'] = $('.volume')[0].className.includes('muted');
 
-      response = { 'response': { 'mute': json['mute'] } };
+      response = { response: { mute: playerState['mute'] } };
       break;
     }
     case 'up':
-    case 'down': { // volume up/down
+    case 'down': {
+      // volume up/down
       request.type == 'up' ? utils.volumeUp() : utils.volumeDown();
-      json['volume'] = utils.getVolume();
-      json['time']['current'] = utils.getCurrentTime();
-      json['time']['end'] = utils.getEndTime();
+      playerState['volume'] = utils.getVolume();
+      playerState['time']['current'] = utils.getCurrentTime();
+      playerState['time']['end'] = utils.getEndTime();
 
-      response = { 'response': { 'time': json['time'], 'volume': json['volume'] } };
+      response = {
+        response: { time: playerState['time'], volume: playerState['volume'] },
+      };
       break;
     }
     case 'seekb':
-    case 'seekf': { // seek backward/forward
+    case 'seekf': {
+      // seek backward/forward
       if (request.type == 'seekb') {
         utils.seekBack();
       } else if (request.type == 'seekf') {
         utils.seekForward();
       }
-      json['time']['current'] = utils.getCurrentTime();
-      json['time']['end'] = utils.getEndTime();
+      playerState['time']['current'] = utils.getCurrentTime();
+      playerState['time']['end'] = utils.getEndTime();
 
-      response = { 'response': { 'time': json['time'] } };
+      response = { response: { time: playerState['time'] } };
       break;
     }
-    case 'ap': { // add to playlist
+    case 'ap': {
+      // add to playlist
       focus();
       new Promise<void>((resolve) => {
-        $('.sc-button-more.sc-button-secondary.sc-button.sc-button-medium.sc-button-responsive')[0].click();
+        $(
+          '.sc-button-more.sc-button-secondary.sc-button.sc-button-medium.sc-button-responsive'
+        )[0].click();
         console.log('1');
         resolve();
       }).then(() => {
         console.log('2');
-        $('.sc-button-addtoset.sc-button.moreActions__button.sc-button-medium.sc-button-tertiary')[0].click();
+        $(
+          '.sc-button-addtoset.sc-button.moreActions__button.sc-button-medium.sc-button-tertiary'
+        )[0].click();
       });
       break;
     }
     default: {
       // console.log('default:', request);
       break;
-    };
+    }
   }
 
   return response;
 });
-
-var prefix = '[SoundCloud Player] ',
-  reloading = false,
-  json: Record<string, any> = {
-    'playing': false,
-    'artwork': null,
-    'link': null,
-    'favorite': false,
-    'shuffle': false,
-    'repeat': 'none',
-    'time': {
-      'current': null,
-      'end': null
-    },
-    'volume': 0,
-    'mute': false
-    // , "playlist": []
-  };

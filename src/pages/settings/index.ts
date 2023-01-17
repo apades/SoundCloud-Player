@@ -369,13 +369,13 @@ async function initInputs() {
 async function putAllLinks() {
   /* eslint-disable */
     const linkList = [
-        ['#github', 'https://github.com/S4WA/SoundCloud-Player'],
-        ['#hp', 'https://akiba.cloud/soundcloud-player/'],
-        ['#yt', 'https://youtu.be/hIJyF2u3-RY'],
-        ['#feedback', 'https://forms.gle/oG2DvmK7HXhq8q8ZA'],
-        ['#support', 'https://ko-fi.com/sawanese'],
-        ['.wiki', 'https://github.com/S4WA/SoundCloud-Player/wiki'],
-        ['#eshortcuts', 'chrome://extensions/shortcuts'],
+        ['#github',       'https://github.com/S4WA/SoundCloud-Player'],
+        ['#hp',           'https://akiba.cloud/soundcloud-player/'],
+        ['#yt',           'https://youtu.be/hIJyF2u3-RY'],
+        ['#feedback',     'https://forms.gle/oG2DvmK7HXhq8q8ZA'],
+        ['#support',      'https://ko-fi.com/sawanese'],
+        ['.wiki',         'https://github.com/S4WA/SoundCloud-Player/wiki'],
+        ['#eshortcuts',   'chrome://extensions/shortcuts'],
         ['#captureguide', 'https://github.com/S4WA/SoundCloud-Player/wiki/For-Streamers-and-Gamers#using-the-green-screen-soundcloud-player-embed'],
     ];
     /* eslint-enable */

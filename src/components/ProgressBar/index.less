@@ -1,0 +1,46 @@
+.progress-bar{
+  position: relative;
+  margin: 0;
+  padding: 0;
+  .click-area{
+    .wh(100%);
+
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .ant-slider-handle{
+    display: none;
+  }
+  .ant-slider-rail{
+    height: inherit;
+    background-color: var(--bg-color);
+  }
+  .ant-slider-track{
+    z-index: 2;
+    height: inherit;
+    background-color: var(--load-color);
+  }
+  &.ant-slider:hover .ant-slider-track{
+    background-color: var(--load-color) ;
+  }
+  &.ant-slider-vertical {
+    .ant-slider-rail{
+      left: 0;
+      width: 100%;
+    }
+    .ant-slider-track{
+      left: 0;
+      width: 100%;
+    }
+  }
+  &.disable-hover:hover{
+    cursor: inherit;
+    .ant-slider-rail{
+      background-color: var(--bg-color);
+    }
+  }
+}
+.progress-bar.ant-slider-vertical .ant-slider-rail{
+  height: 100%
+}

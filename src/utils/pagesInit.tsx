@@ -1,9 +1,10 @@
-import { ReactElement } from 'react'
-import { render } from 'react-dom'
+import { ReactElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import '../style/global.css';
 
 export let reactRender = (
-    App: ReactElement,
-    dom: Element = document.getElementById('app')
+  App: ReactElement,
+  dom: Element = document.getElementById('app')
 ): void => {
-    render(App, dom)
-}
+  createRoot(dom).render(App);
+};

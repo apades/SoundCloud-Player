@@ -18,7 +18,7 @@ export function getArtist() {
 export function getArtwork() {
   let a = $('.playbackSoundBadge span.sc-artwork').css('background-image');
   if (a != null && a.includes('120x120')) {
-    a = a.replace('120x120', '500x500')
+    a = a.replace('120x120', '500x500');
   }
   if (a != null && a.includes('50x50.')) {
     a = a.replace('50x50.', '500x500.');
@@ -31,7 +31,9 @@ export function getLink() {
 
   if ($(cls).length == 0) return null;
 
-  let url = new URL($<HTMLAnchorElement>(cls)[0].href), params = url.searchParams, in_system_playlist = params.get('in_system_playlist') != null;
+  let url = new URL($<HTMLAnchorElement>(cls)[0].href),
+    params = url.searchParams,
+    in_system_playlist = params.get('in_system_playlist') != null;
 
   if (in_system_playlist) {
     params.delete('in_system_playlist');
@@ -56,7 +58,9 @@ export function getEndTime() {
 }
 
 export function getVolume() {
-  return Number($('.volume__sliderWrapper')[0].getAttribute('aria-valuenow')) * 100;
+  return (
+    Number($('.volume__sliderWrapper')[0].getAttribute('aria-valuenow')) * 100
+  );
 }
 
 export function isMuted() {
@@ -65,7 +69,9 @@ export function isMuted() {
 }
 
 export function getRepeatMode() {
-  return $('.repeatControl')[0].className.replace('repeatControl sc-ir m-', '').toLowerCase();
+  return $('.repeatControl')[0]
+    .className.replace('repeatControl sc-ir m-', '')
+    .toLowerCase();
 }
 
 export function isShuffling() {

@@ -1,8 +1,16 @@
+import { PlayerState } from '@root/store/playerState';
+import { observer } from 'mobx-react';
 import { FC } from 'react';
+import ProgressBar from '../ProgressBar';
 import './Flat.less';
 
-// TODO flat views like https://codepen.io/juliepark/pen/YLPBNv
-const MusicPlayerFlat: FC = (props) => {
+type Props = {
+  playerState: PlayerState;
+};
+
+// flat views https://codepen.io/juliepark/pen/YLPBNv
+const MusicPlayerFlat: FC<Props> = (props) => {
+  let { playerState } = props;
   return (
     <div id="player">
       <div className="album">
@@ -11,11 +19,14 @@ const MusicPlayerFlat: FC = (props) => {
         </div>
       </div>
       <div className="info">
-        <div className="progress-bar">
-          <div className="time--current">1:25</div>
-          <div className="time--total">3:15</div>
-          <div className="fill"></div>
+        <div className="time-container f-i-center">
+          <div className="time--current">{playerState.time.current}</div>
+          <div className="progress-bar-container">
+            <ProgressBar loadColor="#8BA989" bgColor="#cdd9c2" />
+          </div>
+          <div className="time--total">{playerState.time.end}</div>
         </div>
+
         <div className="currently-playing">
           <h2 className="song-name">Symphony</h2>
           <h3 className="artist-name">Clean Bandit ft. Zara Larsson</h3>
@@ -53,4 +64,4 @@ const MusicPlayerFlat: FC = (props) => {
   );
 };
 
-export default MusicPlayerFlat;
+export default observer(MusicPlayerFlat);

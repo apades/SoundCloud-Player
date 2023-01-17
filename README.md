@@ -31,3 +31,11 @@ After run `npm run dev`, you can see a new folder named **dist** in root directo
 `npm run ui` is local server dev mode, it's hard to hot-reload in extension ui dev, so this is a new way to resolve it.
 If you are windows, and you have sh tools e.g. cmder, use `npm run ui`. If you don't have, use `npm run ui_o`.
 *./buid/webpack.ui.dev.config.js* is ui dev mode config file, you can add new configurations based on this structure, default run with **main** config. If you can use `npm run ui`, then you can run like `npm run ui page2` or `npm run page3`, it will use **page2** or **page3** config to start dev server.
+
+## extension state & soundclound page state
+
+two app have isolated state manage, e.g. i change popup fav state, extension will save fav state and send message to soundclound page, then soundclound page simulate real action. 
+Now we have 2 result:
+1. Success, it's default state
+2. Fail, maybe network problem or server crash
+Or user have fav action in soundclound page. We have to monitor target element attribute change or click, when we have message from extension or user action in soundclound page, **then we send message to extension and double-sided confirmation state synchronization**.
